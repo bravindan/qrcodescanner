@@ -3,7 +3,7 @@ import React from 'react';
 import { View, Text, FlatList } from "react-native";
 
 const history = [
-    { id: "1", text: "Item 1" },
+    { id: "1", text: "Item 1", link:"https://www.google.com" },
     { id: "2", text: "Item 2" },
     { id: "3", text: "Item 3" },
     { id: "4", text: "Item 4" },
@@ -65,6 +65,7 @@ export default function History  () {
                 renderItem={({ item }) => (
                     <View className="bg-white rounded-md p-2 mb-2 flex w-full">
                         <Text className="text-lg font-bold mb-2">{item.text}</Text>
+                        <Text className="text-sm">{item.link}</Text>
                     </View>
                 )}                   
             />
