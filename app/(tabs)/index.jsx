@@ -1,38 +1,13 @@
-import {SafeAreaView, Text, TouchableOpacity, View, StyleSheet} from "react-native";
+import {SafeAreaView, Text, TouchableOpacity, View, StyleSheet, Alert} from "react-native";
 import "../../global.css";
-import {CameraView, CameraType, useCameraPermissions} from "expo-camera";
+import {CameraView,  useCameraPermissions} from "expo-camera";
 import {useState} from "react";
 
-export default function Index() {
-  // const [permission, requestPermission] = useCameraPermissions();
-  //
-  // if(!permission) {
-  //   return <Text>No access to camera</Text>;
-  // }
-  //
-  // if (!permission.granted) {
-  //   // Camera permissions are not granted yet.
-  //   return (
-  //     <View className="flex-1 items-center justify-center">
-  //       <Text className="text-lg font-bold">We need your permission to show the camera</Text>
-  //       <TouchableOpacity onPress={requestPermission} className="bg-gray-800 rounded-lg p-2 mt-4">
-  //         <Text className="text-white font-bold">Grant permission</Text>
-  //       </TouchableOpacity>
-  //     </View>
-  //   );
-  // }
-  //
-  // return (
-  //   <SafeAreaView className="flex-1 items-center justify-center">
-  //     <CameraView
-  //       //facing={CameraType.back}
-  //       style={{ flex: 1 }}
-  //     />
-  //   </SafeAreaView>
-  // );
-  //   const [facing, setFacing] = useState('back');
-    const [permission, requestPermission] = useCameraPermissions();
 
+export default function Index() {
+
+    const [permission, requestPermission] = useCameraPermissions();
+    const [scanResult, setScanResult] = useState(null);
     if (!permission) {
         // Camera permissions are still loading.
         return <View />;
@@ -42,22 +17,21 @@ export default function Index() {
         // Camera permissions are not granted yet.
         return (
             <View style={styles.container}>
+                {/*Alert.alert('Grant Permission', 'We need your permission to show the camera')*/}
                 <Text style={styles.message}>We need your permission to show the camera</Text>
-                <Button onPress={requestPermission} title="grant permission" />
+                <TouchableOpacity onPress={requestPermission} title="grant permission" />
             </View>
         );
     }
 
-    // function toggleCameraFacing() {
-    //     setFacing(current => (current === 'back' ? 'front' : 'back'));
-    // }
 
     return (
         <View style={styles.container}>
             <CameraView style={styles.camera}
-                        // facing={facing}
-                onBarcodeScanned={({ data }) => {
-                    console.log('Scanned barcode:', data);
+                barcodeScannerSettings={{ barcodeTypes: ['aztec', 'ean13', 'ean8', 'qr', 'pdf417', 'upc_e', 'datamatrix', 'code39', 'code93', 'itf14', 'codabar', 'code128', 'upc_a'] }}
+                onBarcodeScanned={({data}) => {
+                    setScanResult(data);
+                    console.log('Scanned barcode:', scanResult);
                 }}
             >
                 <View style={styles.buttonContainer}>
@@ -76,6 +50,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
+
     },
     message: {
         textAlign: 'center',
@@ -83,6 +58,7 @@ const styles = StyleSheet.create({
     },
     camera: {
         flex: 1,
+        padding: 20,
     },
     buttonContainer: {
         flex: 1,
