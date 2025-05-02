@@ -1,13 +1,28 @@
-import {SafeAreaView, Text, TouchableOpacity, View, StyleSheet, Alert} from "react-native";
+import {Text, TouchableOpacity, View, StyleSheet, Alert} from "react-native";
 import "../../global.css";
-import {CameraView,  useCameraPermissions} from "expo-camera";
-import {useState} from "react";
-
+import {CameraView, useCameraPermissions} from "expo-camera";
+import {useState, useEffect} from "react";
+import * as Linking from 'expo-linking';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Index() {
-
     const [permission, requestPermission] = useCameraPermissions();
     const [scanResult, setScanResult] = useState(null);
+
+    useEffect(() => {
+        if (scanResult) {
+            const storeScanResult = async () => {
+                try {
+                    await AsyncStorage.setItem('scanResult', scanResult);
+                    console.log('Scan result saved to AsyncStorage:', scanResult);
+                } catch (error) {
+                    console.error('Failed to save scan result:', error);
+                }
+            };
+            storeScanResult();
+        }
+    }, [scanResult]);
+
     if (!permission) {
         // Camera permissions are still loading.
         return <View />;
@@ -17,28 +32,45 @@ export default function Index() {
         // Camera permissions are not granted yet.
         return (
             <View style={styles.container}>
-                {/*Alert.alert('Grant Permission', 'We need your permission to show the camera')*/}
                 <Text style={styles.message}>We need your permission to show the camera</Text>
                 <TouchableOpacity onPress={requestPermission} title="grant permission" />
             </View>
         );
     }
 
-
     return (
         <View style={styles.container}>
-            <CameraView style={styles.camera}
-                barcodeScannerSettings={{ barcodeTypes: ['aztec', 'ean13', 'ean8', 'qr', 'pdf417', 'upc_e', 'datamatrix', 'code39', 'code93', 'itf14', 'codabar', 'code128', 'upc_a'] }}
+            <CameraView
+                style={styles.camera}
+                barcodeScannerSettings={{
+                    barcodeTypes: [
+                        'aztec',
+                        'ean13',
+                        'ean8',
+                        'qr',
+                        'pdf417',
+                        'upc_e',
+                        'datamatrix',
+                        'code39',
+                        'code93',
+                        'itf14',
+                        'codabar',
+                        'code128',
+                        'upc_a',
+                    ],
+                }}
                 onBarcodeScanned={({data}) => {
-                    setScanResult(data);
-                    console.log('Scanned barcode:', scanResult);
+                    if (data) {
+                        setScanResult(data);
+                        Linking.openURL(data).catch(err => {
+                            Alert.alert('Invalid URL', 'The scanned code is not a valid URL.');
+                        });
+                    }
                 }}
             >
                 <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.button}
-                                      // onPress={toggleCameraFacing}
-                    >
-                        {/*<Text style={styles.text}>Flip Camera</Text>*/}
+                    <TouchableOpacity style={styles.button}>
+                        {/* Placeholder for additional functionality */}
                     </TouchableOpacity>
                 </View>
             </CameraView>
@@ -50,7 +82,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-
     },
     message: {
         textAlign: 'center',
@@ -77,4 +108,3 @@ const styles = StyleSheet.create({
         color: 'white',
     },
 });
-
